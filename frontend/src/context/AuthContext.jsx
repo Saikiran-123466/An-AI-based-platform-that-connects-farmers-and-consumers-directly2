@@ -10,7 +10,6 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Check for stored token and user metadata
         const storedToken = localStorage.getItem('token');
         const storedUser = localStorage.getItem('user');
 
@@ -20,19 +19,31 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
     }, []);
 
+    // ✅ LOGIN
     const login = async (email, password) => {
-        const res = await axios.post('http://localhost:5000/api/auth/login', { email, password });
+        const res = await axios.post(
+            'https://agrilink-backend-dhvp.onrender.com/api/auth/login',
+            { email, password }
+        );
+
         localStorage.setItem('token', res.data.token);
         localStorage.setItem('user', JSON.stringify(res.data.user));
         setUser(res.data.user);
+
         return res.data;
     };
 
+    // ✅ REGISTER
     const register = async (name, email, password, role, location) => {
-        const res = await axios.post('http://localhost:5000/api/auth/register', { name, email, password, role, location });
+        const res = await axios.post(
+            'https://agrilink-backend-dhvp.onrender.com/api/auth/register',
+            { name, email, password, role, location }
+        );
+
         return res.data;
     };
 
+    // ✅ LOGOUT
     const logout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
