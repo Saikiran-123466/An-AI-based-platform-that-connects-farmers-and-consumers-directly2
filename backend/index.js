@@ -6,7 +6,7 @@ const db = require('./db');
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
 const aiRoutes = require('./routes/ai');
-const orderRoutes = require('./routes/orders'); // NEW
+const orderRoutes = require('./routes/orders');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -19,14 +19,14 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/ai', aiRoutes);
-app.use('/api/orders', orderRoutes); // NEW
+app.use('/api/orders', orderRoutes);
 
-// Root Endpoint
+// Root endpoint
 app.get('/', (req, res) => {
-    res.send('AgriLink AI Backend is running');
+  res.send('AgriLink AI Backend is running');
 });
 
 // Start server
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
