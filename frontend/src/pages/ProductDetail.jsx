@@ -18,29 +18,37 @@ export default function ProductDetail() {
 
   useEffect(() => {
 
-    // ✅ FIXED PRODUCT API
+    // ✅ PRODUCT FETCH
     axios.get(`${API}/api/products/${id}`)
-      .then(res => setProduct(res.data))
+      .then(res => {
+        console.log("PRODUCT:", res.data);
+        setProduct(res.data);
+      })
       .catch(err => {
         console.log('Error fetching product:', err);
       })
       .finally(() => setLoading(false));
 
-    // ✅ FIXED AI API
+    // ✅ AI RECOMMENDATIONS (SAFE VERSION)
     axios.get(`${API}/api/ai/recommendations/consumer/1`)
       .then(res => {
-        const mockRecs = res.data.map((r, idx) => ({
-          id: 100 + idx,
-          name: r.name,
-          price: r.price,
-          unit: 'kg',
-          farmer_name: 'Local Network',
-          farmer_location: 'Nearby',
-          organic: true
-        }));
-        setRecommendations(mockRecs);
+        if (res.data && Array.isArray(res.data)) {
+          const mapped = res.data.map((r, idx) => ({
+            id: 100 + idx,
+            name: r.name || "Recommended Item",
+            price: r.price || 0,
+            unit: 'kg',
+            farmer_name: 'Local Network',
+            farmer_location: 'Nearby',
+            organic: true,
+            image: r.image || ""
+          }));
+          setRecommendations(mapped);
+        }
       })
-      .catch(err => console.log(err));
+      .catch(err => {
+        console.log("AI ERROR:", err);
+      });
 
   }, [id]);
 
@@ -48,26 +56,62 @@ export default function ProductDetail() {
   if (!product) return <div>Product not found</div>;
 
   return (
-    <div>
+    <div style={{ padding: '20px' }}>
 
-      <button onClick={() => navigate(-1)}>Back</button>
-
-      <h1>{product.name}</h1>
-      <h2>₹{product.price}</h2>
-
-      <p>Farmer: {product.farmer_name}</p>
-      <p>Location: {product.farmer_location}</p>
-
-      <button onClick={() => addToCart(product)}>
-        Add to Cart
+      {/* BACK BUTTON */}
+      <button onClick={() => navigate(-1)} style={{ marginBottom: '15px' }}>
+        <ArrowLeft size={18} /> Back
       </button>
 
-      <h3>AI Suggestions</h3>
-      {recommendations.map(rec => (
-        <div key={rec.id}>
-          {rec.name} - ₹{rec.price}
+      {/* PRODUCT DETAILS */}
+      <h1>{product.name}</h1>
+      <h2>₹{product.price} / {product.unit}</h2>
+
+      <p><b>Farmer:</b> {product.farmer_name}</p>
+      <p><b>Location:</b> {product.farmer_location}</p>
+
+      {product.organic && (
+        <p style={{ color: 'green' }}>
+          <ShieldCheck size={16} /> Organic Product
+        </p>
+      )}
+
+      {/* ADD TO CART */}
+      <button
+        onClick={() => addToCart(product)}
+        style={{
+          marginTop: '15px',
+          padding: '10px',
+          background: '#0a8f3d',
+          color: '#fff',
+          border: 'none',
+          borderRadius: '6px',
+          cursor: 'pointer'
+        }}
+      >
+        <ShoppingCart size={18} /> Add to Cart
+      </button>
+
+      {/* AI RECOMMENDATIONS */}
+      <h3 style={{ marginTop: '30px' }}>AI Suggestions</h3>
+
+      {recommendations.length === 0 ? (
+        <p>No recommendations available</p>
+      ) : (
+        <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+          {recommendations.map(rec => (
+            <div key={rec.id} style={{
+              border: '1px solid #ddd',
+              padding: '10px',
+              borderRadius: '8px',
+              width: '180px'
+            }}>
+              <p><b>{rec.name}</b></p>
+              <p>₹{rec.price}</p>
+            </div>
+          ))}
         </div>
-      ))}
+      )}
 
     </div>
   );
