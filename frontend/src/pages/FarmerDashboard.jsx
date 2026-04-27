@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 
-const API = "https://agrilink-backend.onrender.com";
+// ✅ FIXED BACKEND URL (VERY IMPORTANT)
+const API = "https://agrilink-backend-dhvp.onrender.com";
 
 // ✅ input style
 const inputStyle = {
