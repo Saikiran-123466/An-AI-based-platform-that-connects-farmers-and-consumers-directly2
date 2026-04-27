@@ -4,6 +4,16 @@ import { useAuth } from '../context/AuthContext';
 
 const API = "https://agrilink-backend.onrender.com";
 
+// ✅ input style
+const inputStyle = {
+  width: "100%",
+  padding: "10px",
+  marginBottom: "12px",
+  borderRadius: "8px",
+  border: "1px solid #ccc",
+  outline: "none"
+};
+
 export default function FarmerDashboard() {
   const { user } = useAuth();
 
@@ -71,65 +81,121 @@ export default function FarmerDashboard() {
     <div style={{ padding: '20px' }}>
       <h1>Farmer Dashboard</h1>
 
-      <button onClick={() => setShowAddModal(true)}>
-        Add Product
+      <button
+        onClick={() => setShowAddModal(true)}
+        style={{
+          padding: "10px 15px",
+          background: "#0a8f3d",
+          color: "#fff",
+          border: "none",
+          borderRadius: "8px",
+          cursor: "pointer"
+        }}
+      >
+        + Add Product
       </button>
 
-      <h3>Your Products</h3>
+      <h3 style={{ marginTop: "20px" }}>Your Products</h3>
       {products.map(p => (
         <div key={p.id}>
           {p.name} - ₹{p.price}
         </div>
       ))}
 
-      {/* MODAL */}
+      {/* ✅ MODAL */}
       {showAddModal && (
         <div style={{
-          position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center'
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          backgroundColor: "rgba(0,0,0,0.6)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          zIndex: 1000
         }}>
-          <form onSubmit={handleAddProduct} style={{
-            background: '#fff',
-            padding: '20px',
-            borderRadius: '10px'
+          <div style={{
+            background: "#fff",
+            padding: "25px",
+            borderRadius: "12px",
+            width: "400px",
+            boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
+            position: "relative"
           }}>
-            <h2>Add Product</h2>
 
-            <input
-              placeholder="Name"
-              value={newProduct.name}
-              onChange={e => setNewProduct({...newProduct, name: e.target.value})}
-            />
+            {/* CLOSE BUTTON */}
+            <button
+              onClick={() => setShowAddModal(false)}
+              style={{
+                position: "absolute",
+                top: "10px",
+                right: "15px",
+                border: "none",
+                background: "none",
+                fontSize: "20px",
+                cursor: "pointer"
+              }}
+            >
+              ✕
+            </button>
 
-            <input
-              placeholder="Category"
-              value={newProduct.category}
-              onChange={e => setNewProduct({...newProduct, category: e.target.value})}
-            />
+            <h2 style={{ marginBottom: "15px" }}>Add New Product</h2>
 
-            <input
-              type="number"
-              placeholder="Price"
-              value={newProduct.price}
-              onChange={e => setNewProduct({...newProduct, price: e.target.value})}
-            />
+            <form onSubmit={handleAddProduct}>
 
-            <input
-              type="number"
-              placeholder="Quantity"
-              value={newProduct.quantity}
-              onChange={e => setNewProduct({...newProduct, quantity: e.target.value})}
-            />
+              <input
+                placeholder="Product Name"
+                value={newProduct.name}
+                onChange={e => setNewProduct({...newProduct, name: e.target.value})}
+                style={inputStyle}
+              />
 
-            <br /><br />
+              <input
+                placeholder="Category"
+                value={newProduct.category}
+                onChange={e => setNewProduct({...newProduct, category: e.target.value})}
+                style={inputStyle}
+              />
 
-            <button type="submit">Submit</button>
-            <button type="button" onClick={() => setShowAddModal(false)}>Cancel</button>
-          </form>
+              <div style={{ display: "flex", gap: "10px" }}>
+                <input
+                  type="number"
+                  placeholder="Price ₹"
+                  value={newProduct.price}
+                  onChange={e => setNewProduct({...newProduct, price: e.target.value})}
+                  style={{ ...inputStyle, flex: 1 }}
+                />
+
+                <input
+                  type="number"
+                  placeholder="Quantity"
+                  value={newProduct.quantity}
+                  onChange={e => setNewProduct({...newProduct, quantity: e.target.value})}
+                  style={{ ...inputStyle, flex: 1 }}
+                />
+              </div>
+
+              <button
+                type="submit"
+                style={{
+                  width: "100%",
+                  marginTop: "10px",
+                  padding: "10px",
+                  background: "#0a8f3d",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "8px",
+                  fontWeight: "bold",
+                  cursor: "pointer"
+                }}
+              >
+                Publish Product
+              </button>
+
+            </form>
+          </div>
         </div>
       )}
     </div>
