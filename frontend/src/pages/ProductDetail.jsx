@@ -5,37 +5,30 @@ import { useCart } from '../context/CartContext';
 import { ShoppingCart, ArrowLeft, ShieldCheck } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 
+const API = "https://agrilink-backend-dhvp.onrender.com";
+
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
+
   const [product, setProduct] = useState(null);
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch product details
-    axios.get(`http://localhost:5000/api/products/${id}`)
+
+    // ✅ FIXED PRODUCT API
+    axios.get(`${API}/api/products/${id}`)
       .then(res => setProduct(res.data))
       .catch(err => {
-        console.log('Error fetching product, falling back to mock:', err);
-        setProduct({
-            id: id,
-            name: 'Fresh Harvest ' + id,
-            price: 2.50,
-            unit: 'kg',
-            farmer_name: 'Local Network Farm',
-            farmer_location: 'Green Valley',
-            organic: true,
-            image: ''
-        });
+        console.log('Error fetching product:', err);
       })
       .finally(() => setLoading(false));
 
-    // Fetch AI recommendations
-    axios.get('http://localhost:5000/api/ai/recommendations/consumer/1')
+    // ✅ FIXED AI API
+    axios.get(`${API}/api/ai/recommendations/consumer/1`)
       .then(res => {
-        // Mock mapping since recommendations from AI might not have full product schemas
         const mockRecs = res.data.map((r, idx) => ({
           id: 100 + idx,
           name: r.name,
@@ -48,65 +41,34 @@ export default function ProductDetail() {
         setRecommendations(mockRecs);
       })
       .catch(err => console.log(err));
+
   }, [id]);
 
-  if (loading) return <div className="container" style={{ padding: '4rem 0' }}>Loading...</div>;
-  if (!product) return <div className="container" style={{ padding: '4rem 0' }}>Product not found.</div>;
+  if (loading) return <div>Loading...</div>;
+  if (!product) return <div>Product not found</div>;
 
   return (
-    <div style={{ background: 'var(--color-surface)', minHeight: '100vh', paddingTop: '2rem', paddingBottom: '4rem' }}>
-      <div className="container">
-        <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-primary-dark)', marginBottom: '2rem', fontWeight: 'bold' }}>
-          <ArrowLeft size={20} /> Back
-        </button>
+    <div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-          {/* Image */}
-          <div style={{ borderRadius: '1rem', overflow: 'hidden', height: '400px', backgroundColor: '#eef6ec' }}>
-            <img 
-              src={product.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(product.name)}&background=2e7d32&color=fff&size=800`} 
-              alt={product.name} 
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
-          </div>
+      <button onClick={() => navigate(-1)}>Back</button>
 
-          {/* Details */}
-          <div className="flex flex-col">
-            {product.organic && <span className="badge badge-green" style={{ alignSelf: 'flex-start', marginBottom: '1rem' }}>🌱 Certified Organic</span>}
-            <h1 style={{ fontSize: '2.5rem', color: 'var(--color-primary-dark)', marginBottom: '0.5rem' }}>{product.name}</h1>
-            <h2 style={{ fontSize: '1.8rem', color: 'var(--color-secondary)', fontWeight: 'bold', marginBottom: '1rem' }}>
-              ₹{product.price} <span style={{ fontSize: '1rem', color: 'var(--color-text-muted)' }}>/ {product.unit}</span>
-            </h2>
-            
-            <div style={{ background: '#f5f5f5', padding: '1rem', borderRadius: '0.5rem', marginBottom: '2rem' }}>
-              <h4 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: '#333' }}>
-                <ShieldCheck size={18} color="var(--color-primary)" /> 
-                Farmer Information
-              </h4>
-              <p><strong>Name:</strong> {product.farmer_name}</p>
-              <p><strong>Location:</strong> {product.farmer_location}</p>
-              {product.cultivated_date && <p><strong>Harvested On:</strong> {new Date(product.cultivated_date).toLocaleDateString()}</p>}
-              <p style={{ marginTop: '0.5rem', fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>100% of the product price goes directly to the farmer.</p>
-            </div>
+      <h1>{product.name}</h1>
+      <h2>₹{product.price}</h2>
 
-            <button className="btn btn-primary" style={{ padding: '1rem', fontSize: '1.1rem' }} onClick={() => addToCart(product)}>
-              <ShoppingCart size={20} style={{ marginRight: '0.5rem' }} /> Add to Cart
-            </button>
-          </div>
+      <p>Farmer: {product.farmer_name}</p>
+      <p>Location: {product.farmer_location}</p>
+
+      <button onClick={() => addToCart(product)}>
+        Add to Cart
+      </button>
+
+      <h3>AI Suggestions</h3>
+      {recommendations.map(rec => (
+        <div key={rec.id}>
+          {rec.name} - ₹{rec.price}
         </div>
+      ))}
 
-        {/* AI Recommendations */}
-        <div style={{ marginTop: '4rem' }}>
-          <h3 style={{ fontSize: '1.5rem', color: 'var(--color-primary-dark)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-             ✨ AI Suggestions for You
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {recommendations.map(rec => (
-              <ProductCard key={rec.id} product={rec} />
-            ))}
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
