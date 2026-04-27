@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useCart } from '../context/CartContext';
 import { ShoppingCart, ArrowLeft, ShieldCheck } from 'lucide-react';
-import ProductCard from '../components/ProductCard';
+
 
 const API = "https://agrilink-backend-dhvp.onrender.com";
 
