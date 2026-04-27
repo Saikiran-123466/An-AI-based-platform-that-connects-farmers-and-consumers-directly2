@@ -4,7 +4,7 @@ const db = require('../db');
 const router = express.Router();
 
 
-// ✅ GET ALL PRODUCTS (Marketplace)
+// ✅ GET ALL PRODUCTS
 router.get('/', (req, res) => {
     let query = `
         SELECT p.*, u.name as farmer_name, u.location as farmer_location 
@@ -26,7 +26,7 @@ router.get('/', (req, res) => {
 
     db.all(query, params, (err, rows) => {
         if (err) {
-            console.error(err);
+            console.error("GET ERROR:", err);
             return res.status(500).json({ error: 'Database error' });
         }
         res.json(rows);
@@ -40,7 +40,7 @@ router.get('/farmer/:id', (req, res) => {
 
     db.all(`SELECT * FROM products WHERE farmer_id = ?`, [farmerId], (err, rows) => {
         if (err) {
-            console.error(err);
+            console.error("FARMER GET ERROR:", err);
             return res.status(500).json({ error: 'Database error' });
         }
         res.json(rows);
@@ -48,8 +48,10 @@ router.get('/farmer/:id', (req, res) => {
 });
 
 
-// ✅ ADD PRODUCT (FIXED — THIS IS THE IMPORTANT ONE)
+// ✅ ADD PRODUCT (THIS IS IMPORTANT)
 router.post('/', (req, res) => {
+    console.log("POST BODY:", req.body); // 🔥 Debug log
+
     const {
         farmer_id,
         name,
@@ -62,7 +64,6 @@ router.post('/', (req, res) => {
         cultivated_date
     } = req.body;
 
-    // ✅ VALIDATION
     if (!farmer_id || !name || !category || !price) {
         return res.status(400).json({ error: 'Missing required fields' });
     }
@@ -88,7 +89,7 @@ router.post('/', (req, res) => {
         ],
         function (err) {
             if (err) {
-                console.error("DB ERROR:", err);
+                console.error("POST ERROR:", err);
                 return res.status(500).json({ error: 'Database error', details: err.message });
             }
 
@@ -114,7 +115,7 @@ router.get('/:id', (req, res) => {
 
     db.get(query, [productId], (err, row) => {
         if (err) {
-            console.error(err);
+            console.error("GET ONE ERROR:", err);
             return res.status(500).json({ error: 'Database error' });
         }
 
@@ -163,7 +164,7 @@ router.put('/:id', (req, res) => {
         ],
         function (err) {
             if (err) {
-                console.error(err);
+                console.error("UPDATE ERROR:", err);
                 return res.status(500).json({ error: 'Database error', details: err.message });
             }
 
