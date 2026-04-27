@@ -7,27 +7,13 @@ const router = express.Router();
 // ✅ GET ALL PRODUCTS
 router.get('/', (req, res) => {
     try {
-        let query = `
+        const rows = db.prepare(`
             SELECT p.*, u.name as farmer_name, u.location as farmer_location 
             FROM products p 
             JOIN users u ON p.farmer_id = u.id
-        `;
-        const params = [];
+        `).all();
 
-        if (req.query.category) {
-            query += ` WHERE p.category = ?`;
-            params.push(req.query.category);
-        }
-
-        if (req.query.organic) {
-            query += params.length > 0 ? ` AND` : ` WHERE`;
-            query += ` p.organic = ?`;
-            params.push(req.query.organic === 'true' ? 1 : 0);
-        }
-
-        const rows = db.prepare(query).all(...params);
         res.json(rows);
-
     } catch (err) {
         console.error("GET ERROR:", err.message);
         res.status(500).json({ error: err.message });
@@ -38,41 +24,24 @@ router.get('/', (req, res) => {
 // ✅ GET PRODUCTS BY FARMER
 router.get('/farmer/:id', (req, res) => {
     try {
-        const farmerId = req.params.id;
-
         const rows = db
             .prepare(`SELECT * FROM products WHERE farmer_id = ?`)
-            .all(farmerId);
+            .all(req.params.id);
 
         res.json(rows);
-
     } catch (err) {
-        console.error("FARMER GET ERROR:", err.message);
+        console.error("FARMER ERROR:", err.message);
         res.status(500).json({ error: err.message });
     }
 });
 
 
-// ✅ ADD PRODUCT (FIXED FOR better-sqlite3)
+// ✅ ADD PRODUCT (FINAL WORKING VERSION)
 router.post('/', (req, res) => {
     try {
-        console.log("POST BODY:", req.body);
+        const data = req.body;
 
-        const {
-            farmer_id,
-            name,
-            category,
-            price,
-            quantity,
-            unit,
-            image,
-            organic,
-            cultivated_date
-        } = req.body;
-
-        if (!farmer_id || !name || !category || !price) {
-            return res.status(400).json({ error: 'Missing required fields' });
-        }
+        console.log("DATA RECEIVED:", data);
 
         const stmt = db.prepare(`
             INSERT INTO products 
@@ -81,20 +50,20 @@ router.post('/', (req, res) => {
         `);
 
         const result = stmt.run(
-            farmer_id,
-            name,
-            category,
-            price,
-            quantity || 0,
-            unit || 'kg',
-            image || '',
-            organic ? 1 : 0,
-            cultivated_date || ''
+            data.farmer_id,
+            data.name,
+            data.category,
+            data.price,
+            data.quantity || 0,
+            "kg",
+            "",
+            0,
+            ""
         );
 
-        res.status(201).json({
-            message: 'Product added successfully',
-            productId: result.lastInsertRowid
+        res.json({
+            success: true,
+            id: result.lastInsertRowid
         });
 
     } catch (err) {
@@ -107,21 +76,18 @@ router.post('/', (req, res) => {
 // ✅ GET SINGLE PRODUCT
 router.get('/:id', (req, res) => {
     try {
-        const productId = req.params.id;
-
         const row = db.prepare(`
             SELECT p.*, u.name as farmer_name, u.location as farmer_location 
             FROM products p 
             JOIN users u ON p.farmer_id = u.id
             WHERE p.id = ?
-        `).get(productId);
+        `).get(req.params.id);
 
         if (!row) {
-            return res.status(404).json({ error: 'Product not found' });
+            return res.status(404).json({ error: 'Not found' });
         }
 
         res.json(row);
-
     } catch (err) {
         console.error("GET ONE ERROR:", err.message);
         res.status(500).json({ error: err.message });
@@ -132,37 +98,21 @@ router.get('/:id', (req, res) => {
 // ✅ UPDATE PRODUCT
 router.put('/:id', (req, res) => {
     try {
-        const productId = req.params.id;
-
-        const {
-            name,
-            category,
-            price,
-            quantity,
-            unit,
-            image,
-            organic,
-            cultivated_date
-        } = req.body;
+        const data = req.body;
 
         db.prepare(`
             UPDATE products 
-            SET name=?, category=?, price=?, quantity=?, unit=?, image=?, organic=?, cultivated_date=? 
+            SET name=?, category=?, price=?, quantity=? 
             WHERE id=?
         `).run(
-            name,
-            category,
-            price,
-            quantity,
-            unit,
-            image,
-            organic ? 1 : 0,
-            cultivated_date || '',
-            productId
+            data.name,
+            data.category,
+            data.price,
+            data.quantity,
+            req.params.id
         );
 
-        res.json({ message: 'Product updated successfully' });
-
+        res.json({ success: true });
     } catch (err) {
         console.error("UPDATE ERROR:", err.message);
         res.status(500).json({ error: err.message });
