@@ -6,6 +6,7 @@ const router = express.Router();
 
 // ✅ GET ALL PRODUCTS
 router.get('/', (req, res) => {
+<<<<<<< HEAD
     try {
         const rows = db.prepare(`
             SELECT p.*, u.name as farmer_name, u.location as farmer_location 
@@ -13,6 +14,17 @@ router.get('/', (req, res) => {
             JOIN users u ON p.farmer_id = u.id
         `).all();
 
+=======
+    db.all(`
+        SELECT products.*, users.name AS farmer_name, users.location AS farmer_location
+        FROM products
+        JOIN users ON products.farmer_id = users.id
+    `, [], (err, rows) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: 'Database error' });
+        }
+>>>>>>> ce5ecb8 (fix cart db error)
         res.json(rows);
     } catch (err) {
         console.error("GET ERROR:", err.message);
@@ -23,6 +35,7 @@ router.get('/', (req, res) => {
 
 // ✅ GET PRODUCTS BY FARMER
 router.get('/farmer/:id', (req, res) => {
+<<<<<<< HEAD
     try {
         const rows = db
             .prepare(`SELECT * FROM products WHERE farmer_id = ?`)
@@ -120,3 +133,56 @@ router.put('/:id', (req, res) => {
 });
 
 module.exports = router;
+=======
+    const farmerId = req.params.id;
+
+    db.all(`SELECT * FROM products WHERE farmer_id = ?`, [farmerId], (err, rows) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: 'Database error' });
+        }
+        res.json(rows);
+    });
+});
+
+
+// ✅ ADD PRODUCT (THIS FIXES YOUR ERROR)
+router.post('/', (req, res) => {
+    const { name, category, price, quantity, unit, organic, farmer_id } = req.body;
+
+    // 🔥 VALIDATION
+    if (!name || !price || !quantity || !farmer_id) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    const sql = `
+        INSERT INTO products (name, category, price, quantity, unit, organic, farmer_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    db.run(sql,
+        [
+            name,
+            category || 'general',
+            price,
+            quantity,
+            unit || 'kg',
+            organic ? 1 : 0,
+            farmer_id
+        ],
+        function (err) {
+            if (err) {
+                console.error("DB ERROR:", err.message);
+                return res.status(500).json({ error: 'Database insert failed' });
+            }
+
+            res.json({
+                message: 'Product added successfully',
+                productId: this.lastID
+            });
+        }
+    );
+});
+
+module.exports = router;
+>>>>>>> ce5ecb8 (fix cart db error)

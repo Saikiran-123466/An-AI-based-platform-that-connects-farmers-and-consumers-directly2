@@ -17,6 +17,7 @@ export default function ProductDetail() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+<<<<<<< HEAD
 
     // ✅ PRODUCT FETCH
     axios.get(`${API}/api/products/${id}`)
@@ -110,9 +111,109 @@ export default function ProductDetail() {
               <p>₹{rec.price}</p>
             </div>
           ))}
+=======
+    // ✅ Fetch product
+    axios.get(`/api/products/${id}`)
+      .then(res => setProduct(res.data))
+      .catch(err => {
+        console.error('Error fetching product:', err);
+      })
+      .finally(() => setLoading(false));
+
+    // ✅ Fetch AI recommendations
+    axios.get('/api/ai/recommendations/consumer/1')
+      .then(res => {
+        const mapped = (res.data || []).map((r, idx) => ({
+          id: 100 + idx,
+          name: r.name,
+          price: r.price,
+          unit: 'kg',
+          farmer_name: 'Local Network',
+          farmer_location: 'Nearby',
+          organic: true,
+          image: ''
+        }));
+        setRecommendations(mapped);
+      })
+      .catch(err => console.error(err));
+
+  }, [id]);
+
+  if (loading) {
+    return <div className="container" style={{ padding: '4rem 0' }}>Loading...</div>;
+  }
+
+  if (!product) {
+    return <div className="container" style={{ padding: '4rem 0' }}>Product not found</div>;
+  }
+
+  return (
+    <div style={{ background: 'var(--color-surface)', minHeight: '100vh', padding: '2rem' }}>
+      <div className="container">
+
+        {/* Back */}
+        <button
+          onClick={() => navigate(-1)}
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            marginBottom: '2rem'
+          }}
+        >
+          <ArrowLeft /> Back
+        </button>
+
+        {/* Product */}
+        <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
+          
+          <img
+            src={product.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(product.name)}`}
+            alt={product.name}
+            style={{ width: '300px', borderRadius: '10px' }}
+          />
+
+          <div>
+            {product.organic && <p>🌱 Organic</p>}
+
+            <h1>{product.name}</h1>
+            <h2>₹{product.price} / {product.unit}</h2>
+
+            <div style={{ marginTop: '1rem' }}>
+              <p><b>Farmer:</b> {product.farmer_name}</p>
+              <p><b>Location:</b> {product.farmer_location}</p>
+              {product.cultivated_date && (
+                <p><b>Harvested:</b> {new Date(product.cultivated_date).toLocaleDateString()}</p>
+              )}
+            </div>
+
+            <button
+              className="btn btn-primary"
+              style={{ marginTop: '1rem' }}
+              onClick={() => addToCart(product)}
+            >
+              <ShoppingCart /> Add to Cart
+            </button>
+          </div>
+>>>>>>> ce5ecb8 (fix cart db error)
         </div>
       )}
 
+<<<<<<< HEAD
+=======
+        {/* Recommendations */}
+        <div style={{ marginTop: '3rem' }}>
+          <h3>✨ AI Suggestions</h3>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px,1fr))', gap: '1rem' }}>
+            {recommendations.map(rec => (
+              <ProductCard key={rec.id} product={rec} />
+            ))}
+          </div>
+        </div>
+
+      </div>
+>>>>>>> ce5ecb8 (fix cart db error)
     </div>
   );
 }

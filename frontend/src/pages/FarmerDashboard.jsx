@@ -19,12 +19,17 @@ export default function FarmerDashboard() {
   const { user } = useAuth();
 
   const [products, setProducts] = useState([]);
+<<<<<<< HEAD
   const [showAddModal, setShowAddModal] = useState(false);
+=======
+  const [orders, setOrders] = useState([]);
+>>>>>>> ce5ecb8 (fix cart db error)
 
   const [newProduct, setNewProduct] = useState({
     name: '',
     category: '',
     price: '',
+<<<<<<< HEAD
     quantity: '',
     unit: 'kg',
     organic: false,
@@ -38,10 +43,25 @@ export default function FarmerDashboard() {
 
   const fetchProducts = () => {
     axios.get(`${API}/api/products/farmer/${user.id}`)
+=======
+    quantity: ''
+  });
+
+  useEffect(() => {
+    if (user) {
+      fetchProducts();
+      fetchOrders();
+    }
+  }, [user]);
+
+  const fetchProducts = () => {
+    axios.get(`/api/products/farmer/${user.id}`)
+>>>>>>> ce5ecb8 (fix cart db error)
       .then(res => setProducts(res.data))
       .catch(err => console.log(err));
   };
 
+<<<<<<< HEAD
   const handleAddProduct = (e) => {
     e.preventDefault();
 
@@ -60,10 +80,41 @@ export default function FarmerDashboard() {
       alert("✅ Product added successfully");
       setShowAddModal(false);
       fetchProducts();
+=======
+  const fetchOrders = () => {
+    axios.get(`/api/orders/farmer/${user.id}`)
+      .then(res => setOrders(res.data))
+      .catch(err => console.log(err));
+  };
+
+  const handleAddProduct = (e) => {
+    e.preventDefault();
+
+    // 🔥 VALIDATION
+    if (!newProduct.name || !newProduct.price || !newProduct.quantity) {
+      alert("Fill all fields ❗");
+      return;
+    }
+
+    axios.post('/api/products', {
+      name: newProduct.name,
+      category: newProduct.category || "general",
+      price: parseFloat(newProduct.price),
+      quantity: parseInt(newProduct.quantity),
+      unit: "kg",
+      organic: false,
+      farmer_id: user.id
+    })
+    .then(() => {
+      alert("Product added successfully ✅");
+
+      // Reset form
+>>>>>>> ce5ecb8 (fix cart db error)
       setNewProduct({
         name: '',
         category: '',
         price: '',
+<<<<<<< HEAD
         quantity: '',
         unit: 'kg',
         organic: false,
@@ -75,10 +126,21 @@ export default function FarmerDashboard() {
       console.log("FULL ERROR:", err);
       console.log("SERVER ERROR:", err.response?.data);
       alert("❌ Failed to add product");
+=======
+        quantity: ''
+      });
+
+      fetchProducts();
+    })
+    .catch(err => {
+      console.error(err.response?.data || err);
+      alert("Failed to add product ❌");
+>>>>>>> ce5ecb8 (fix cart db error)
     });
   };
 
   return (
+<<<<<<< HEAD
     <div style={{ padding: '20px' }}>
       <h1>Farmer Dashboard</h1>
 
@@ -198,7 +260,67 @@ export default function FarmerDashboard() {
             </form>
           </div>
         </div>
+=======
+    <div style={{ padding: '2rem' }}>
+      <h1>Farmer Dashboard</h1>
+
+      {/* PRODUCTS */}
+      <h2>Your Products</h2>
+      {products.length === 0 ? (
+        <p>No products</p>
+      ) : (
+        products.map(p => (
+          <div key={p.id}>
+            {p.name} - ₹{p.price}
+          </div>
+        ))
+>>>>>>> ce5ecb8 (fix cart db error)
       )}
+
+      {/* ADD PRODUCT FORM */}
+      <h2>Add Product</h2>
+      <form onSubmit={handleAddProduct} style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxWidth: '300px' }}>
+
+        <input
+          placeholder="Product Name"
+          value={newProduct.name}
+          onChange={e => setNewProduct({ ...newProduct, name: e.target.value })}
+        />
+
+        <input
+          placeholder="Category"
+          value={newProduct.category}
+          onChange={e => setNewProduct({ ...newProduct, category: e.target.value })}
+        />
+
+        <input
+          placeholder="Price"
+          type="number"
+          value={newProduct.price}
+          onChange={e => setNewProduct({ ...newProduct, price: e.target.value })}
+        />
+
+        <input
+          placeholder="Quantity"
+          type="number"
+          value={newProduct.quantity}
+          onChange={e => setNewProduct({ ...newProduct, quantity: e.target.value })}
+        />
+
+        <button type="submit">Add Product</button>
+      </form>
+
+      {/* ORDERS */}
+      <h2>Orders</h2>
+      {orders.map(o => (
+        <div key={o.id}>
+          {o.product_name} - ₹{o.total_price}
+        </div>
+      ))}
     </div>
   );
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> ce5ecb8 (fix cart db error)
