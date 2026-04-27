@@ -48,11 +48,21 @@ router.get('/farmer/:id', (req, res) => {
 });
 
 
-// ✅ ADD PRODUCT (FIXED)
+// ✅ ADD PRODUCT (FIXED — THIS IS THE IMPORTANT ONE)
 router.post('/', (req, res) => {
-    const { farmer_id, name, category, price, quantity, unit, image, organic, cultivated_date } = req.body;
+    const {
+        farmer_id,
+        name,
+        category,
+        price,
+        quantity,
+        unit,
+        image,
+        organic,
+        cultivated_date
+    } = req.body;
 
-    // 🔥 VALIDATION
+    // ✅ VALIDATION
     if (!farmer_id || !name || !category || !price) {
         return res.status(400).json({ error: 'Missing required fields' });
     }
@@ -120,7 +130,17 @@ router.get('/:id', (req, res) => {
 // ✅ UPDATE PRODUCT
 router.put('/:id', (req, res) => {
     const productId = req.params.id;
-    const { name, category, price, quantity, unit, image, organic, cultivated_date } = req.body;
+
+    const {
+        name,
+        category,
+        price,
+        quantity,
+        unit,
+        image,
+        organic,
+        cultivated_date
+    } = req.body;
 
     const query = `
         UPDATE products 
